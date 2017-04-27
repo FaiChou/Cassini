@@ -50,6 +50,29 @@ class ViewController: UIViewController {
       make.top.equalTo(self.cassiniTitleLabel.snp.bottom)
       make.bottom.equalToSuperview().offset(-10)
     }
+    let cassiniDroneSocket = CassniDroneSocket()
+    
+  }
+}
+
+class CassniDroneSocket: NSObject, GCDAsyncSocketDelegate {
+  var cassiniDroneSocket: GCDAsyncSocket!
+  
+  override init() {
+    super.init()
+    let cassiniDroneSocket = GCDAsyncSocket(delegate: self, delegateQueue: DispatchQueue.main)
+    do {
+      print("try ..")
+      try cassiniDroneSocket.connect(toHost: "faichou.space", onPort: 80)
+    } catch let error {
+      print(error)
+    }
+  }
+  func socket(_ sock: GCDAsyncSocket, didConnectToHost host: String, port: UInt16) {
+    print("success.")
+  }
+  func socketDidDisconnect(_ sock: GCDAsyncSocket, withError err: Error?) {
+    print("disconnect.")
   }
 }
 
