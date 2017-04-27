@@ -1,0 +1,4 @@
+target 'Cassini' do
+  use_frameworks!
+  pod 'CocoaAsyncSocket'
+end

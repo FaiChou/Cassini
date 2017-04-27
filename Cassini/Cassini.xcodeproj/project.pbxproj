@@ -82,9 +82,11 @@
 		4D34ECCC1EB1D7180095EFA5 /* LayoutConstraint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D34EC851EB1D7180095EFA5 /* LayoutConstraint.swift */; };
 		4D34ECCD1EB1D7180095EFA5 /* LayoutConstraintItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D34EC861EB1D7180095EFA5 /* LayoutConstraintItem.swift */; };
 		4D34ECCE1EB1D7180095EFA5 /* UILayoutSupport+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D34EC881EB1D7180095EFA5 /* UILayoutSupport+Extensions.swift */; };
+		9907BB2BA5DCB3C7144D820C /* Pods_Cassini.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C460638A8BC417901B765BCA /* Pods_Cassini.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		2B526482903337021F529903 /* Pods-Cassini.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Cassini.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Cassini/Pods-Cassini.debug.xcconfig"; sourceTree = "<group>"; };
 		4D34EB8D1EB1CDE50095EFA5 /* Cassini.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cassini.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4D34EB901EB1CDE50095EFA5 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4D34EB921EB1CDE50095EFA5 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -164,6 +166,8 @@
 		4D34EC861EB1D7180095EFA5 /* LayoutConstraintItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LayoutConstraintItem.swift; sourceTree = "<group>"; };
 		4D34EC871EB1D7180095EFA5 /* SnapKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SnapKit.h; sourceTree = "<group>"; };
 		4D34EC881EB1D7180095EFA5 /* UILayoutSupport+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UILayoutSupport+Extensions.swift"; sourceTree = "<group>"; };
+		7AF29193ADA17CE5C4E925FC /* Pods-Cassini.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Cassini.release.xcconfig"; path = "Pods/Target Support Files/Pods-Cassini/Pods-Cassini.release.xcconfig"; sourceTree = "<group>"; };
+		C460638A8BC417901B765BCA /* Pods_Cassini.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Cassini.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -171,17 +175,29 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9907BB2BA5DCB3C7144D820C /* Pods_Cassini.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1749CBBFC10A7105BE83F332 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				2B526482903337021F529903 /* Pods-Cassini.debug.xcconfig */,
+				7AF29193ADA17CE5C4E925FC /* Pods-Cassini.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 		4D34EB841EB1CDE50095EFA5 = {
 			isa = PBXGroup;
 			children = (
 				4D34EB8F1EB1CDE50095EFA5 /* Cassini */,
 				4D34EB8E1EB1CDE50095EFA5 /* Products */,
+				1749CBBFC10A7105BE83F332 /* Pods */,
+				86CCC7C52593665A065828B3 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -358,6 +374,14 @@
 			path = SnapKit;
 			sourceTree = "<group>";
 		};
+		86CCC7C52593665A065828B3 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				C460638A8BC417901B765BCA /* Pods_Cassini.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -365,9 +389,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4D34EB9F1EB1CDE60095EFA5 /* Build configuration list for PBXNativeTarget "Cassini" */;
 			buildPhases = (
+				F22EAF3DE5FB1A94F619FC5E /* [CP] Check Pods Manifest.lock */,
 				4D34EB891EB1CDE50095EFA5 /* Sources */,
 				4D34EB8A1EB1CDE50095EFA5 /* Frameworks */,
 				4D34EB8B1EB1CDE50095EFA5 /* Resources */,
+				A22E61062EEFF33C1E5D158D /* [CP] Embed Pods Frameworks */,
+				412F27792B2D673F32CC2527 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -427,6 +454,54 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		412F27792B2D673F32CC2527 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Cassini/Pods-Cassini-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		A22E61062EEFF33C1E5D158D /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Cassini/Pods-Cassini-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		F22EAF3DE5FB1A94F619FC5E /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		4D34EB891EB1CDE50095EFA5 /* Sources */ = {
@@ -623,26 +698,32 @@
 		};
 		4D34EBA01EB1CDE60095EFA5 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2B526482903337021F529903 /* Pods-Cassini.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 7WS42S6435;
 				INFOPLIST_FILE = Cassini/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.FaiChou.Cassini;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
 		4D34EBA11EB1CDE60095EFA5 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AF29193ADA17CE5C4E925FC /* Pods-Cassini.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 7WS42S6435;
 				INFOPLIST_FILE = Cassini/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.FaiChou.Cassini;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
@@ -666,6 +747,7 @@
 				4D34EBA11EB1CDE60095EFA5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
