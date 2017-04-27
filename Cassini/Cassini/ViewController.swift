@@ -14,7 +14,7 @@ class ViewController: UIViewController {
     let label = UILabel()
     label.text = "Cassini"
     label.textAlignment = .center
-    label.textColor = UIColor.cyan
+    label.textColor = UIColor.brown
     label.font = UIFont.systemFont(ofSize: 18, weight: 9)
     return label
   }()
