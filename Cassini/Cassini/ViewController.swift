@@ -24,6 +24,7 @@ class ViewController: UIViewController {
     label.textAlignment = .center
     label.textColor = UIColor.brown
     label.font = UIFont.systemFont(ofSize: 18, weight: 9)
+    label.heroID = "Cassini"
     return label
   }()
   let cassiniDescriptionLabel: UILabel = {
@@ -34,6 +35,19 @@ class ViewController: UIViewController {
     label.font = UIFont.italicSystemFont(ofSize: 13)
     return label
   }()
+  
+  let button: UIButton = {
+    let button = UIButton(type: .custom)
+    button.setBackgroundImage(UIImage(named: "arrow-right-c"), for: .normal)
+    button.addTarget(self, action: #selector(action), for: .touchUpInside)
+    button.heroID = "button"
+    return button
+  }()
+  func action() {
+    let vc = CassiniDroneController()
+    present(vc, animated: true, completion: nil)
+  }
+  
   override func viewDidLoad() {
     super.viewDidLoad()
     view.addSubview(cassiniTitleLabel)
@@ -50,29 +64,113 @@ class ViewController: UIViewController {
       make.top.equalTo(self.cassiniTitleLabel.snp.bottom)
       make.bottom.equalToSuperview().offset(-10)
     }
-    let cassiniDroneSocket = CassniDroneSocket()
-    
+    view.addSubview(button)
+    button.snp.makeConstraints { (make) in
+      make.width.equalTo(30)
+      make.height.equalTo(30)
+      make.right.equalToSuperview().offset(-10)
+      make.bottom.equalToSuperview().offset(-10)
+    }
+    isHeroEnabled = true
   }
 }
 
-class CassniDroneSocket: NSObject, GCDAsyncSocketDelegate {
-  var cassiniDroneSocket: GCDAsyncSocket!
+class CassiniDroneController: UIViewController, GCDAsyncUdpSocketDelegate {
+  let button: UIButton = {
+    let button = UIButton(type: .custom)
+    button.setBackgroundImage(UIImage(named: "close-round"), for: .normal)
+    button.addTarget(self, action: #selector(action), for: .touchUpInside)
+    button.heroID = "button"
+    return button
+  }()
+  func action() {
+    dismiss(animated: true, completion: nil)
+  }
   
-  override init() {
-    super.init()
-    let cassiniDroneSocket = GCDAsyncSocket(delegate: self, delegateQueue: DispatchQueue.main)
-    do {
-      print("try ..")
-      try cassiniDroneSocket.connect(toHost: "faichou.space", onPort: 80)
-    } catch let error {
-      print(error)
+  var _socket: GCDAsyncUdpSocket?
+  var socket: GCDAsyncUdpSocket? {
+    get {
+      if _socket == nil {
+//        guard let port = UInt16(6666) else {
+//          print(">>> Unable to init socket: local port unspecified.")
+//          return nil
+//        }
+        let port = UInt16(6666)
+        let sock = GCDAsyncUdpSocket(delegate: self, delegateQueue: DispatchQueue.main)
+        do {
+          try sock.bind(toPort: port)
+          try sock.beginReceiving()
+        } catch let err as NSError {
+          print(">>> Error while initializing socket: \(err.localizedDescription)")
+          sock.close()
+          return nil
+        }
+        _socket = sock
+      }
+      return _socket
+    }
+    set {
+      _socket?.close()
+      _socket = newValue
     }
   }
-  func socket(_ sock: GCDAsyncSocket, didConnectToHost host: String, port: UInt16) {
-    print("success.")
+  
+  let sendButton: UIButton = {
+    let button = UIButton(type: .custom)
+    button.setBackgroundImage(UIImage(named: "paper-airplane"), for: .normal)
+    button.addTarget(self, action: #selector(send), for: .touchUpInside)
+    button.heroID = "Cassini"
+    return button
+  }()
+  
+  func send() -> Void {
+    let value = "FaiChou"
+    let data = value.data(using: .utf8)
+    socket?.send(data!, toHost: "192.168.2.3", port: 6666, withTimeout: 2, tag: 0)
   }
-  func socketDidDisconnect(_ sock: GCDAsyncSocket, withError err: Error?) {
-    print("disconnect.")
+  
+  //MARK: - life cycle
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    view.backgroundColor = UIColor.white
+    
+    view.addSubview(button)
+    button.snp.makeConstraints { (make) in
+      make.width.equalTo(20)
+      make.height.equalTo(20)
+      make.top.equalToSuperview().offset(30)
+      make.left.equalToSuperview().offset(10)
+    }
+    view.addSubview(sendButton)
+    sendButton.snp.makeConstraints { (make) in
+      make.center.equalToSuperview()
+      make.width.equalTo(50)
+      make.height.equalTo(40)
+    }
+    isHeroEnabled = true
+  }
+  deinit {
+    socket = nil
+    print(">>> socket dead..")
+  }
+  //MARK: - GCDAsyncUdpSocketDelegate
+  func udpSocket(_ sock: GCDAsyncUdpSocket, didConnectToAddress address: Data) {
+    print(#function)
+  }
+  func udpSocket(_ sock: GCDAsyncUdpSocket, didNotConnect error: Error?) {
+    print(#function)
+  }
+  func udpSocket(_ sock: GCDAsyncUdpSocket, didSendDataWithTag tag: Int) {
+    print(#function)
+  }
+  func udpSocket(_ sock: GCDAsyncUdpSocket, didNotSendDataWithTag tag: Int, dueToError error: Error?) {
+    print(#function)
+  }
+  func udpSocket(_ sock: GCDAsyncUdpSocket, didReceive data: Data, fromAddress address: Data, withFilterContext filterContext: Any?) {
+    print(#function)
+  }
+  func udpSocketDidClose(_ sock: GCDAsyncUdpSocket, withError error: Error?) {
+    print(#function)
   }
 }
 
