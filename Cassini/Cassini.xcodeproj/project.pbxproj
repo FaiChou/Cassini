@@ -82,6 +82,8 @@
 		4D34ECCC1EB1D7180095EFA5 /* LayoutConstraint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D34EC851EB1D7180095EFA5 /* LayoutConstraint.swift */; };
 		4D34ECCD1EB1D7180095EFA5 /* LayoutConstraintItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D34EC861EB1D7180095EFA5 /* LayoutConstraintItem.swift */; };
 		4D34ECCE1EB1D7180095EFA5 /* UILayoutSupport+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D34EC881EB1D7180095EFA5 /* UILayoutSupport+Extensions.swift */; };
+		4DDAEB8A1EB36CA8001D0765 /* CassiniDroneController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DDAEB891EB36CA8001D0765 /* CassiniDroneController.swift */; };
+		4DDAEB8C1EB36D2A001D0765 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4DDAEB8B1EB36D2A001D0765 /* QuartzCore.framework */; };
 		9907BB2BA5DCB3C7144D820C /* Pods_Cassini.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C460638A8BC417901B765BCA /* Pods_Cassini.framework */; };
 /* End PBXBuildFile section */
 
@@ -166,6 +168,8 @@
 		4D34EC861EB1D7180095EFA5 /* LayoutConstraintItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LayoutConstraintItem.swift; sourceTree = "<group>"; };
 		4D34EC871EB1D7180095EFA5 /* SnapKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SnapKit.h; sourceTree = "<group>"; };
 		4D34EC881EB1D7180095EFA5 /* UILayoutSupport+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UILayoutSupport+Extensions.swift"; sourceTree = "<group>"; };
+		4DDAEB891EB36CA8001D0765 /* CassiniDroneController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CassiniDroneController.swift; sourceTree = "<group>"; };
+		4DDAEB8B1EB36D2A001D0765 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		7AF29193ADA17CE5C4E925FC /* Pods-Cassini.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Cassini.release.xcconfig"; path = "Pods/Target Support Files/Pods-Cassini/Pods-Cassini.release.xcconfig"; sourceTree = "<group>"; };
 		C460638A8BC417901B765BCA /* Pods_Cassini.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Cassini.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -175,6 +179,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4DDAEB8C1EB36D2A001D0765 /* QuartzCore.framework in Frameworks */,
 				9907BB2BA5DCB3C7144D820C /* Pods_Cassini.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -236,6 +241,7 @@
 				4D34EB941EB1CDE60095EFA5 /* Main.storyboard */,
 				4D34EB991EB1CDE60095EFA5 /* LaunchScreen.storyboard */,
 				4D34EB921EB1CDE50095EFA5 /* ViewController.swift */,
+				4DDAEB891EB36CA8001D0765 /* CassiniDroneController.swift */,
 			);
 			name = Main;
 			sourceTree = "<group>";
@@ -377,6 +383,7 @@
 		86CCC7C52593665A065828B3 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				4DDAEB8B1EB36D2A001D0765 /* QuartzCore.framework */,
 				C460638A8BC417901B765BCA /* Pods_Cassini.framework */,
 			);
 			name = Frameworks;
@@ -529,6 +536,7 @@
 				4D34EC8A1EB1D7180095EFA5 /* HeroCoreAnimationViewContext.swift in Sources */,
 				4D34EC9F1EB1D7180095EFA5 /* HeroStringConvertible.swift in Sources */,
 				4D34EC971EB1D7180095EFA5 /* UIViewController+Hero.swift in Sources */,
+				4DDAEB8A1EB36CA8001D0765 /* CassiniDroneController.swift in Sources */,
 				4D34EC8B1EB1D7180095EFA5 /* HeroDefaultAnimator.swift in Sources */,
 				4D34ECC71EB1D7180095EFA5 /* ConstraintView+Extensions.swift in Sources */,
 				4D34ECB31EB1D7180095EFA5 /* ConstraintInsets.swift in Sources */,
