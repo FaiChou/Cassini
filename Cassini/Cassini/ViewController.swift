@@ -88,6 +88,11 @@ class CassiniDroneController: UIViewController, GCDAsyncUdpSocketDelegate, UITex
       self.serverLabel.text = "\(self.host):\(port)"
     }
   }
+  var msg = "FaiChou" {
+    didSet {
+      self.msgLabel.text = msg
+    }
+  }
   
   //MARK: - control & his action
   lazy var serverLabel: UILabel = {
@@ -98,6 +103,14 @@ class CassiniDroneController: UIViewController, GCDAsyncUdpSocketDelegate, UITex
     label.text = "\(self.host):\(self.port)"
     label.font = UIFont.boldSystemFont(ofSize: 13)
     label.heroID = "content"
+    return label
+  }()
+  lazy var msgLabel: UILabel = {
+    let label = UILabel()
+    label.text = self.msg
+    label.textAlignment = .center
+    label.textColor = UIColor.black
+    label.font = UIFont.boldSystemFont(ofSize: 13)
     return label
   }()
   
@@ -116,10 +129,6 @@ class CassiniDroneController: UIViewController, GCDAsyncUdpSocketDelegate, UITex
   var socket: GCDAsyncUdpSocket? {
     get {
       if _socket == nil {
-//        guard let port = UInt16(6666) else {
-//          print(">>> Unable to init socket: local port unspecified.")
-//          return nil
-//        }
         let port = UInt16(3333)
         let sock = GCDAsyncUdpSocket(delegate: self, delegateQueue: DispatchQueue.main)
         do {
@@ -148,9 +157,8 @@ class CassiniDroneController: UIViewController, GCDAsyncUdpSocketDelegate, UITex
     return button
   }()
   
-  func send() -> Void {
-    let value = "FaiChou"
-    let data = value.data(using: .utf8)
+  func send() {
+    let data = self.msg.data(using: .utf8)
     socket?.send(data!, toHost: self.host, port: UInt16(port), withTimeout: 2, tag: 0)
   }
   
@@ -212,6 +220,53 @@ class CassiniDroneController: UIViewController, GCDAsyncUdpSocketDelegate, UITex
     }
   }
   
+  let msgButton: UIButton = {
+    let button = UIButton(type: .custom)
+    button.setBackgroundImage(UIImage(named: "ios7-keypad-outline"), for: .normal)
+    button.addTarget(self, action: #selector(writeMyMsg), for: .touchUpInside)
+    return button
+  }()
+  
+  func writeMyMsg() {
+    let alertController = UIAlertController(
+      title: "Type Your Message",
+      message: "Message Sent to Server",
+      preferredStyle: .alert)
+    alertController.addTextField { (textField) in
+      textField.placeholder = "message(\(self.msg))"
+      textField.delegate = self
+      textField.addTarget(self, action: #selector(self.msgAlertTextFieldChang), for: .editingChanged)
+    }
+
+    let okAction = UIAlertAction(
+      title: "OK",
+      style: .default) { (action) in
+        let msgTF = alertController.textFields![0] as UITextField
+        self.msg = msgTF.text ?? "FaiChou"
+    }
+    okAction.isEnabled = false
+    let cancleAction = UIAlertAction(
+      title: "Cancel",
+      style: .cancel) { (action) in
+        print("cancel..")
+    }
+    alertController.addAction(okAction)
+    alertController.addAction(cancleAction)
+    self.present(
+      alertController,
+      animated: true,
+      completion: nil)
+  }
+  func msgAlertTextFieldChang() {
+    let alertController = self.presentedViewController as? UIAlertController
+    if alertController != nil {
+      let msgTF = alertController?.textFields?[0]
+      if (msgTF?.text?.characters.count)! > 0 {
+        alertController?.actions.first?.isEnabled = true
+      }
+    }
+  }
+  
   //MARK: - life cycle
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -241,7 +296,20 @@ class CassiniDroneController: UIViewController, GCDAsyncUdpSocketDelegate, UITex
     sendButton.snp.makeConstraints { (make) in
       make.center.equalToSuperview()
       make.width.equalTo(50)
+      make.height.equalTo(50)
+    }
+    view.addSubview(msgLabel)
+    msgLabel.snp.makeConstraints { (make) in
+      make.width.equalToSuperview()
       make.height.equalTo(40)
+      make.centerX.equalToSuperview()
+      make.top.equalTo(self.sendButton.snp.bottom).offset(5)
+    }
+    view.addSubview(msgButton)
+    msgButton.snp.makeConstraints { (make) in
+      make.size.equalTo(self.closeButton)
+      make.centerX.equalToSuperview()
+      make.bottom.equalToSuperview().offset(-10)
     }
     isHeroEnabled = true
   }
