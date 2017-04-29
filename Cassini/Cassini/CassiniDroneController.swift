@@ -11,6 +11,9 @@ import UIKit
 import CocoaAsyncSocket
 import QuartzCore
 
+let HOST = "CassiniHost"
+let PORT = "CassiniPort"
+
 class CassiniDroneController: UIViewController, GCDAsyncUdpSocketDelegate, UITextFieldDelegate {
   
   //MARK: - variables
@@ -140,6 +143,8 @@ class CassiniDroneController: UIViewController, GCDAsyncUdpSocketDelegate, UITex
         let portTF = alertController.textFields![1] as UITextField
         self.host = hostTF.text ?? "192.168.2.3"
         self.port = ((portTF.text ?? "6666") as NSString).integerValue
+        UserDefaults.standard.set(self.host, forKey: HOST)
+        UserDefaults.standard.set(self.port, forKey: PORT)
     }
     okAction.isEnabled = false
     let cancleAction = UIAlertAction(
@@ -258,6 +263,9 @@ class CassiniDroneController: UIViewController, GCDAsyncUdpSocketDelegate, UITex
       make.bottom.equalToSuperview().offset(-10)
     }
     isHeroEnabled = true
+    
+    self.host = (UserDefaults.standard.value(forKey: HOST) as? String) ?? "192.168.2.3"
+    self.port = (UserDefaults.standard.value(forKey: PORT) as? Int) ?? 6666
   }
   deinit {
     socket = nil
