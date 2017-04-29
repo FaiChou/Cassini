@@ -218,6 +218,12 @@ class CassiniDroneController: UIViewController, GCDAsyncUdpSocketDelegate, UITex
     }
   }
   
+  private let bgImageView: UIImageView = {
+    let imageView = UIImageView(image: #imageLiteral(resourceName: "bg2"))
+    imageView.alpha = 0.8
+    return imageView
+  }()
+  
   //MARK: - life cycle
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -248,6 +254,13 @@ class CassiniDroneController: UIViewController, GCDAsyncUdpSocketDelegate, UITex
       make.center.equalToSuperview()
       make.width.equalTo(50)
       make.height.equalTo(50)
+    }
+    view.addSubview(bgImageView)
+    bgImageView.snp.makeConstraints { (make) in
+      make.width.equalToSuperview()
+      make.top.equalTo(self.serverLabel.snp.bottom)
+      make.centerX.equalToSuperview()
+      make.bottom.equalTo(self.sendButton.snp.top).offset(-10)
     }
     view.addSubview(msgLabel)
     msgLabel.snp.makeConstraints { (make) in
