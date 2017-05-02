@@ -93,7 +93,7 @@ class CassiniDroneController: UIViewController, GCDAsyncUdpSocketDelegate, UITex
     button.setBackgroundImage(UIImage(named: "ios7-paperplane-outline"), for: .normal)
     button.addTarget(self, action: #selector(send), for: .touchUpInside)
     button.heroID = "Cassini"
-    button.layer.insertSublayer(self.radarLayer, below: button.layer)
+    button.layer.addSublayer(self.radarLayer)
     return button
   }()
   
