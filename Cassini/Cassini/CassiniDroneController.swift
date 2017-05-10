@@ -66,67 +66,30 @@ class CassiniDroneController: UIViewController {
     dismiss(animated: true, completion: nil)
   }
   
-  var _socketUdp: GCDAsyncUdpSocket?
-  var socketUdp: GCDAsyncUdpSocket? {
-    get {
-      if _socketUdp == nil {
-        let port = UInt16(3333)
-        let sock = GCDAsyncUdpSocket(delegate: self, delegateQueue: DispatchQueue.main)
-        do {
-          try sock.bind(toPort: port)
-          try sock.beginReceiving()
-        } catch let err as NSError {
-          print(">>> Error while initializing socket: \(err.localizedDescription)")
-          sock.close()
-          return nil
-        }
-        _socketUdp = sock
-      }
-      return _socketUdp
-    }
-    set {
-      _socketUdp?.close()
-      _socketUdp = newValue
-    }
-  }
-  var _socketTcp: GCDAsyncSocket?
-  var socketTcp: GCDAsyncSocket? {
-    get {
-      if _socketTcp == nil {
-        let port = UInt16(6666)
-        let sock = GCDAsyncSocket(delegate: self, delegateQueue: DispatchQueue.main)
-        do {
-          try sock.connect(toHost: self.host, onPort: port)
-//          try sock.accept(onPort: port)
-        } catch let err as NSError {
-          print(">>> Error while initializing socket: \(err.localizedDescription)")
-          sock.disconnect()
-          return nil
-        }
-        _socketTcp = sock
-      }
-      return _socketTcp
-    }
-    set {
-      _socketTcp?.disconnect()
-      _socketTcp = newValue
-    }
-  }
-  private func reconnectTcp() {
-    if self.socketTcp != nil {
-      self.socketTcp?.disconnect()
-      self.socketTcp = nil
-    }
-    let port = UInt16(6666)
-    let sock = GCDAsyncSocket(delegate: self, delegateQueue: DispatchQueue.main)
+  lazy var socketUdp: GCDAsyncUdpSocket = {
+    let socket = GCDAsyncUdpSocket(delegate: self, delegateQueue: DispatchQueue.main)
+    let port = UInt16(3333)
     do {
-      try sock.connect(toHost: self.host, onPort: port)
-//      try sock.accept(onPort: port)
+      try socket.bind(toPort: port)
     } catch let err as NSError {
       print(">>> Error while initializing socket: \(err.localizedDescription)")
-      sock.disconnect()
+      socket.close()
     }
-    self.socketTcp = sock
+    return socket
+  }()
+
+  lazy var socketTcp: GCDAsyncSocket = {
+    let socket = GCDAsyncSocket(delegate: self, delegateQueue: DispatchQueue.main)
+    return socket
+  }()
+
+  private func reconnectTcp() {
+    do {
+      try self.socketTcp.connect(toHost: self.host, onPort: UInt16(self.port))
+    } catch let err as NSError {
+      print(">>> Error while initializing socket: \(err.localizedDescription)")
+      self.socketTcp.disconnect()
+    }
   }
   
   lazy var sendButton: UIButton = {
@@ -153,9 +116,9 @@ class CassiniDroneController: UIViewController {
     let data = self.msg.data(using: .utf8)
     switch self.currentSocketMode {
     case .UDP:
-      socketUdp?.send(data!, toHost: self.host, port: UInt16(port), withTimeout: 2, tag: 0)
+      socketUdp.send(data!, toHost: self.host, port: UInt16(port), withTimeout: 2, tag: 0)
     case .TCP:
-      socketTcp?.write(data!, withTimeout: -1, tag: 0)
+      socketTcp.write(data!, withTimeout: -1, tag: 0)
     default:
       break
     }
@@ -290,7 +253,7 @@ class CassiniDroneController: UIViewController {
   var currentSocketMode: SocketMode = .UDP {
     didSet {
       if currentSocketMode == .UDP {
-        self.socketTcp?.disconnect()
+        self.socketTcp.disconnect()
       } else {
         self.reconnectTcp()
       }
@@ -398,8 +361,8 @@ class CassiniDroneController: UIViewController {
     self.port = (UserDefaults.standard.value(forKey: PORT) as? Int) ?? 6666
   }
   deinit {
-    socketUdp = nil
-    socketTcp = nil
+    socketUdp.close()
+    socketTcp.disconnect()
     print(">>> socket dead..")
   }
 }
@@ -407,6 +370,7 @@ extension CassiniDroneController: GCDAsyncSocketDelegate {
   //MARK: - GCDAsyncSocketDelegate
   func socket(_ sock: GCDAsyncSocket, didConnectToHost host: String, port: UInt16) {
     SBHUD.showSuccess(msg: "TCP已连接")
+    print("\(#function): \(host):\(port)")
   }
   func socketDidDisconnect(_ sock: GCDAsyncSocket, withError err: Error?) {
     SBHUD.showSuccess(msg: "TCP已断开连接")
@@ -417,12 +381,14 @@ extension CassiniDroneController: GCDAsyncSocketDelegate {
 }
 extension CassiniDroneController: GCDAsyncUdpSocketDelegate {
   //MARK: - GCDAsyncUdpSocketDelegate
+  func udpSocket(_ sock: GCDAsyncUdpSocket, didConnectToAddress address: Data) {
+    print("\(#function): \(address)")
+  }
   func udpSocket(_ sock: GCDAsyncUdpSocket, didSendDataWithTag tag: Int) {
     print(#function)
   }
-  func udpSocket(_ sock: GCDAsyncUdpSocket, didReceive data: Data, fromAddress address: Data,
-                 withFilterContext filterContext: Any?) {
-    print("\(#function):\(data)")
+  func udpSocketDidClose(_ sock: GCDAsyncUdpSocket, withError error: Error?) {
+    print(#function)
   }
 }
 extension CassiniDroneController: UITextFieldDelegate {
