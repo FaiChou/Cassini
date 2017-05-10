@@ -14,7 +14,7 @@ import QuartzCore
 let HOST = "CassiniHost"
 let PORT = "CassiniPort"
 
-class CassiniDroneController: UIViewController, GCDAsyncUdpSocketDelegate, UITextFieldDelegate {
+class CassiniDroneController: UIViewController {
   
   //MARK: - variables
   var host = "192.168.2.3" {
@@ -56,7 +56,9 @@ class CassiniDroneController: UIViewController, GCDAsyncUdpSocketDelegate, UITex
   let closeButton: UIButton = {
     let button = UIButton(type: .custom)
     button.setBackgroundImage(UIImage(named: "close-round"), for: .normal)
-    button.addTarget(self, action: #selector(close), for: .touchUpInside)
+    button.addTarget(self,
+                     action: #selector(close),
+                     for: .touchUpInside)
     button.heroID = "close"
     return button
   }()
@@ -64,10 +66,10 @@ class CassiniDroneController: UIViewController, GCDAsyncUdpSocketDelegate, UITex
     dismiss(animated: true, completion: nil)
   }
   
-  var _socket: GCDAsyncUdpSocket?
-  var socket: GCDAsyncUdpSocket? {
+  var _socketUdp: GCDAsyncUdpSocket?
+  var socketUdp: GCDAsyncUdpSocket? {
     get {
-      if _socket == nil {
+      if _socketUdp == nil {
         let port = UInt16(3333)
         let sock = GCDAsyncUdpSocket(delegate: self, delegateQueue: DispatchQueue.main)
         do {
@@ -78,20 +80,61 @@ class CassiniDroneController: UIViewController, GCDAsyncUdpSocketDelegate, UITex
           sock.close()
           return nil
         }
-        _socket = sock
+        _socketUdp = sock
       }
-      return _socket
+      return _socketUdp
     }
     set {
-      _socket?.close()
-      _socket = newValue
+      _socketUdp?.close()
+      _socketUdp = newValue
     }
+  }
+  var _socketTcp: GCDAsyncSocket?
+  var socketTcp: GCDAsyncSocket? {
+    get {
+      if _socketTcp == nil {
+        let port = UInt16(6666)
+        let sock = GCDAsyncSocket(delegate: self, delegateQueue: DispatchQueue.main)
+        do {
+          try sock.connect(toHost: self.host, onPort: port)
+//          try sock.accept(onPort: port)
+        } catch let err as NSError {
+          print(">>> Error while initializing socket: \(err.localizedDescription)")
+          sock.disconnect()
+          return nil
+        }
+        _socketTcp = sock
+      }
+      return _socketTcp
+    }
+    set {
+      _socketTcp?.disconnect()
+      _socketTcp = newValue
+    }
+  }
+  private func reconnectTcp() {
+    if self.socketTcp != nil {
+      self.socketTcp?.disconnect()
+      self.socketTcp = nil
+    }
+    let port = UInt16(6666)
+    let sock = GCDAsyncSocket(delegate: self, delegateQueue: DispatchQueue.main)
+    do {
+      try sock.connect(toHost: self.host, onPort: port)
+//      try sock.accept(onPort: port)
+    } catch let err as NSError {
+      print(">>> Error while initializing socket: \(err.localizedDescription)")
+      sock.disconnect()
+    }
+    self.socketTcp = sock
   }
   
   lazy var sendButton: UIButton = {
     let button = UIButton(type: .custom)
     button.setBackgroundImage(UIImage(named: "ios7-paperplane-outline"), for: .normal)
-    button.addTarget(self, action: #selector(send), for: .touchUpInside)
+    button.addTarget(self,
+                     action: #selector(send),
+                     for: .touchUpInside)
     button.heroID = "Cassini"
     button.layer.addSublayer(self.radarLayer)
     return button
@@ -108,13 +151,22 @@ class CassiniDroneController: UIViewController, GCDAsyncUdpSocketDelegate, UITex
   
   func send() {
     let data = self.msg.data(using: .utf8)
-    socket?.send(data!, toHost: self.host, port: UInt16(port), withTimeout: 2, tag: 0)
+    switch self.currentSocketMode {
+    case .UDP:
+      socketUdp?.send(data!, toHost: self.host, port: UInt16(port), withTimeout: 2, tag: 0)
+    case .TCP:
+      socketTcp?.write(data!, withTimeout: -1, tag: 0)
+    default:
+      break
+    }
   }
   
   let settingButton: UIButton = {
     let button = UIButton(type: .custom)
     button.setBackgroundImage(UIImage(named: "ios7-settings-strong"), for: .normal)
-    button.addTarget(self, action: #selector(setting), for: .touchUpInside)
+    button.addTarget(self,
+                     action: #selector(setting),
+                     for: .touchUpInside)
     button.heroID = "setting"
     return button
   }()
@@ -128,13 +180,17 @@ class CassiniDroneController: UIViewController, GCDAsyncUdpSocketDelegate, UITex
       textField.placeholder = "host(\(self.host))"
       textField.keyboardType = .decimalPad
       textField.delegate = self
-      textField.addTarget(self, action: #selector(self.alertTextFieldChangeCharactor(sender:)), for: .editingChanged)
+      textField.addTarget(self,
+                          action: #selector(self.alertTextFieldChangeCharactor(sender:)),
+                          for: .editingChanged)
     }
     alertController.addTextField { (textField) in
       textField.placeholder = "port(\(self.port))"
       textField.keyboardType = .decimalPad
       textField.delegate = self
-      textField.addTarget(self, action: #selector(self.alertTextFieldChangeCharactor(sender:)), for: .editingChanged)
+      textField.addTarget(self,
+                          action: #selector(self.alertTextFieldChangeCharactor(sender:)),
+                          for: .editingChanged)
     }
     let okAction = UIAlertAction(
       title: "OK",
@@ -143,6 +199,9 @@ class CassiniDroneController: UIViewController, GCDAsyncUdpSocketDelegate, UITex
         let portTF = alertController.textFields![1] as UITextField
         self.host = hostTF.text ?? "192.168.2.3"
         self.port = ((portTF.text ?? "6666") as NSString).integerValue
+        if self.currentSocketMode == .TCP {
+          self.reconnectTcp()
+        }
         UserDefaults.standard.set(self.host, forKey: HOST)
         UserDefaults.standard.set(self.port, forKey: PORT)
     }
@@ -174,7 +233,9 @@ class CassiniDroneController: UIViewController, GCDAsyncUdpSocketDelegate, UITex
   let msgButton: UIButton = {
     let button = UIButton(type: .custom)
     button.setBackgroundImage(UIImage(named: "ios7-keypad-outline"), for: .normal)
-    button.addTarget(self, action: #selector(writeMyMsg), for: .touchUpInside)
+    button.addTarget(self,
+                     action: #selector(writeMyMsg),
+                     for: .touchUpInside)
     return button
   }()
   
@@ -186,7 +247,9 @@ class CassiniDroneController: UIViewController, GCDAsyncUdpSocketDelegate, UITex
     alertController.addTextField { (textField) in
       textField.placeholder = "message(\(self.msg))"
       textField.delegate = self
-      textField.addTarget(self, action: #selector(self.msgAlertTextFieldChang), for: .editingChanged)
+      textField.addTarget(self,
+                          action: #selector(self.msgAlertTextFieldChang),
+                          for: .editingChanged)
     }
     
     let okAction = UIAlertAction(
@@ -218,12 +281,40 @@ class CassiniDroneController: UIViewController, GCDAsyncUdpSocketDelegate, UITex
     }
   }
   
-  private let bgImageView: UIImageView = {
-    let imageView = UIImageView(image: #imageLiteral(resourceName: "bg2"))
-    imageView.alpha = 0.8
-    return imageView
-  }()
+  enum SocketMode {
+    case None
+    case TCP
+    case UDP
+  }
   
+  var currentSocketMode: SocketMode = .UDP {
+    didSet {
+      if currentSocketMode == .UDP {
+        self.socketTcp?.disconnect()
+      } else {
+        self.reconnectTcp()
+      }
+    }
+  }
+  
+  let tcpUdpSegmentControl: UISegmentedControl = {
+    let ct = UISegmentedControl(items: ["UDP", "TCP"])
+    ct.selectedSegmentIndex = 0
+    ct.addTarget(self,
+                 action: #selector(switchTcpUdp),
+                 for: .valueChanged)
+    return ct
+  }()
+  @objc private func switchTcpUdp(sc: UISegmentedControl) {
+    switch sc.selectedSegmentIndex {
+    case 0:
+      self.currentSocketMode = .UDP
+    case 1:
+      self.currentSocketMode = .TCP
+    default:
+      self.currentSocketMode = .None
+    }
+  }
   //MARK: - life cycle
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -246,21 +337,21 @@ class CassiniDroneController: UIViewController, GCDAsyncUdpSocketDelegate, UITex
     view.addSubview(settingButton)
     settingButton.snp.makeConstraints { (make) in
       make.size.equalTo(self.closeButton)
-      make.top.equalToSuperview().offset(30)
-      make.right.equalToSuperview().offset(-10)
+      make.left.equalToSuperview().offset(30)
+      make.bottom.equalToSuperview().offset(-10)
+    }
+    view.addSubview(tcpUdpSegmentControl)
+    tcpUdpSegmentControl.snp.makeConstraints { (make) in
+      make.width.equalToSuperview().multipliedBy(0.5)
+      make.top.equalTo(serverLabel.snp.bottom).offset(10)
+      make.centerX.equalToSuperview()
+      make.height.equalTo(25)
     }
     view.addSubview(sendButton)
     sendButton.snp.makeConstraints { (make) in
       make.center.equalToSuperview()
       make.width.equalTo(50)
       make.height.equalTo(50)
-    }
-    view.addSubview(bgImageView)
-    bgImageView.snp.makeConstraints { (make) in
-      make.width.equalToSuperview()
-      make.top.equalTo(self.serverLabel.snp.bottom)
-      make.centerX.equalToSuperview()
-      make.bottom.equalTo(self.sendButton.snp.top).offset(-10)
     }
     view.addSubview(msgLabel)
     msgLabel.snp.makeConstraints { (make) in
@@ -281,17 +372,34 @@ class CassiniDroneController: UIViewController, GCDAsyncUdpSocketDelegate, UITex
     self.port = (UserDefaults.standard.value(forKey: PORT) as? Int) ?? 6666
   }
   deinit {
-    socket = nil
+    socketUdp = nil
+    socketTcp = nil
     print(">>> socket dead..")
   }
+}
+extension CassiniDroneController: GCDAsyncSocketDelegate {
+  //MARK: - GCDAsyncSocketDelegate
+  func socket(_ sock: GCDAsyncSocket, didConnectToHost host: String, port: UInt16) {
+    SBHUD.showSuccess(msg: "TCP已连接")
+  }
+  func socketDidDisconnect(_ sock: GCDAsyncSocket, withError err: Error?) {
+    SBHUD.showSuccess(msg: "TCP已断开连接")
+  }
+  func socket(_ sock: GCDAsyncSocket, didRead data: Data, withTag tag: Int) {
+    print("\(#function):\(data)")
+  }
+}
+extension CassiniDroneController: GCDAsyncUdpSocketDelegate {
   //MARK: - GCDAsyncUdpSocketDelegate
   func udpSocket(_ sock: GCDAsyncUdpSocket, didSendDataWithTag tag: Int) {
     print(#function)
   }
-  func udpSocket(_ sock: GCDAsyncUdpSocket, didReceive data: Data, fromAddress address: Data, withFilterContext filterContext: Any?) {
-    print(#function)
+  func udpSocket(_ sock: GCDAsyncUdpSocket, didReceive data: Data, fromAddress address: Data,
+                 withFilterContext filterContext: Any?) {
+    print("\(#function):\(data)")
   }
-  
+}
+extension CassiniDroneController: UITextFieldDelegate {
   //MARK: - UITextFieldDelegate
   func textFieldDidEndEditing(_ textField: UITextField) {
     print(#function)
@@ -299,7 +407,6 @@ class CassiniDroneController: UIViewController, GCDAsyncUdpSocketDelegate, UITex
   func textFieldDidBeginEditing(_ textField: UITextField) {
     print(#function)
   }
-  
 }
 
 class RadarLayer: CALayer {

@@ -84,6 +84,7 @@
 		4D34ECCE1EB1D7180095EFA5 /* UILayoutSupport+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D34EC881EB1D7180095EFA5 /* UILayoutSupport+Extensions.swift */; };
 		4DDAEB8A1EB36CA8001D0765 /* CassiniDroneController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DDAEB891EB36CA8001D0765 /* CassiniDroneController.swift */; };
 		4DDAEB8C1EB36D2A001D0765 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4DDAEB8B1EB36D2A001D0765 /* QuartzCore.framework */; };
+		4DF3B71C1EC2AC02003EFDA3 /* SBHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DF3B71B1EC2AC02003EFDA3 /* SBHUD.swift */; };
 		9907BB2BA5DCB3C7144D820C /* Pods_Cassini.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C460638A8BC417901B765BCA /* Pods_Cassini.framework */; };
 /* End PBXBuildFile section */
 
@@ -170,6 +171,7 @@
 		4D34EC881EB1D7180095EFA5 /* UILayoutSupport+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UILayoutSupport+Extensions.swift"; sourceTree = "<group>"; };
 		4DDAEB891EB36CA8001D0765 /* CassiniDroneController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CassiniDroneController.swift; sourceTree = "<group>"; };
 		4DDAEB8B1EB36D2A001D0765 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		4DF3B71B1EC2AC02003EFDA3 /* SBHUD.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SBHUD.swift; sourceTree = "<group>"; };
 		7AF29193ADA17CE5C4E925FC /* Pods-Cassini.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Cassini.release.xcconfig"; path = "Pods/Target Support Files/Pods-Cassini/Pods-Cassini.release.xcconfig"; sourceTree = "<group>"; };
 		C460638A8BC417901B765BCA /* Pods_Cassini.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Cassini.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -229,6 +231,7 @@
 		4D34EBA21EB1D6150095EFA5 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				4DF3B71B1EC2AC02003EFDA3 /* SBHUD.swift */,
 				4D34EC3A1EB1D7180095EFA5 /* Hero */,
 				4D34EC651EB1D7180095EFA5 /* SnapKit */,
 			);
@@ -551,6 +554,7 @@
 				4D34EC8D1EB1D7180095EFA5 /* HeroDebugPlugin.swift in Sources */,
 				4D34ECC11EB1D7180095EFA5 /* ConstraintMultiplierTarget.swift in Sources */,
 				4D34EC8E1EB1D7180095EFA5 /* HeroDebugView.swift in Sources */,
+				4DF3B71C1EC2AC02003EFDA3 /* SBHUD.swift in Sources */,
 				4D34EC981EB1D7180095EFA5 /* Hero.swift in Sources */,
 				4D34ECA71EB1D7180095EFA5 /* BasePreprocessor.swift in Sources */,
 				4D34ECB91EB1D7180095EFA5 /* ConstraintLayoutSupport.swift in Sources */,
