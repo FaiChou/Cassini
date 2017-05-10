@@ -47,6 +47,23 @@ class ViewController: UIViewController {
     present(vc, animated: true, completion: nil)
   }
   
+  let bottomView: UIView = {
+    let v = UIView()
+    v.backgroundColor = .blue
+    v.alpha = 0.3
+    v.addTopBorderWithColor(color: .red)
+    return v
+  }()
+  
+  private struct LayoutConstant {
+    static let itemWitdh = 25
+    static let itemHeight = 25
+    static let itemLeftPadding = 30
+    static let itemRightPadding = 30
+    static let itemBottomPadding = 5
+    static let bottomBarHeight = 40
+  }
+  
   override func viewDidLoad() {
     super.viewDidLoad()
     view.addSubview(cassiniTitleLabel)
@@ -61,14 +78,21 @@ class ViewController: UIViewController {
       make.width.equalToSuperview().multipliedBy(0.9)
       make.centerX.equalToSuperview()
       make.top.equalTo(self.cassiniTitleLabel.snp.bottom)
-      make.bottom.equalToSuperview().offset(-10)
+      make.bottom.equalToSuperview().offset(-20)
+    }
+    view.addSubview(bottomView)
+    bottomView.snp.makeConstraints { (make) in
+      make.width.equalToSuperview()
+      make.centerX.equalToSuperview()
+      make.height.equalTo(LayoutConstant.bottomBarHeight)
+      make.bottom.equalToSuperview()
     }
     view.addSubview(pushButton)
     pushButton.snp.makeConstraints { (make) in
-      make.width.equalTo(30)
-      make.height.equalTo(30)
-      make.right.equalToSuperview().offset(-10)
-      make.bottom.equalToSuperview().offset(-10)
+      make.width.equalTo(LayoutConstant.itemWitdh)
+      make.height.equalTo(LayoutConstant.itemHeight)
+      make.right.equalToSuperview().offset(-LayoutConstant.itemRightPadding)
+      make.bottom.equalToSuperview().offset(-LayoutConstant.itemBottomPadding)
     }
     isHeroEnabled = true
   }

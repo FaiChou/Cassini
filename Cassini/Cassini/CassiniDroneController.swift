@@ -315,17 +315,43 @@ class CassiniDroneController: UIViewController {
       self.currentSocketMode = .None
     }
   }
+  
+  let bottomView: UIView = {
+    let v = UIView()
+    v.backgroundColor = .blue
+    v.alpha = 0.3
+    v.addTopBorderWithColor(color: .red)
+    return v
+  }()
+  
+  private struct LayoutConstant {
+    static let itemWitdh = 25
+    static let itemHeight = 25
+    static let itemLeftPadding = 30
+    static let itemRightPadding = 30
+    static let itemBottomPadding = 5
+    static let bottomBarHeight = 40
+  }
+  
   //MARK: - life cycle
   override func viewDidLoad() {
     super.viewDidLoad()
     view.backgroundColor = UIColor.white
     
+    view.addSubview(bottomView)
+    bottomView.snp.makeConstraints { (make) in
+      make.width.equalToSuperview()
+      make.centerX.equalToSuperview()
+      make.height.equalTo(LayoutConstant.bottomBarHeight)
+      make.bottom.equalToSuperview()
+    }
+    
     view.addSubview(closeButton)
     closeButton.snp.makeConstraints { (make) in
-      make.width.equalTo(25)
-      make.height.equalTo(25)
-      make.bottom.equalToSuperview().offset(-10)
-      make.right.equalToSuperview().offset(-10)
+      make.width.equalTo(LayoutConstant.itemWitdh)
+      make.height.equalTo(LayoutConstant.itemHeight)
+      make.bottom.equalToSuperview().offset(-LayoutConstant.itemBottomPadding)
+      make.right.equalToSuperview().offset(-LayoutConstant.itemRightPadding)
     }
     view.addSubview(serverLabel)
     serverLabel.snp.makeConstraints { (make) in
@@ -337,8 +363,8 @@ class CassiniDroneController: UIViewController {
     view.addSubview(settingButton)
     settingButton.snp.makeConstraints { (make) in
       make.size.equalTo(self.closeButton)
-      make.left.equalToSuperview().offset(30)
-      make.bottom.equalToSuperview().offset(-10)
+      make.left.equalToSuperview().offset(LayoutConstant.itemLeftPadding)
+      make.bottom.equalToSuperview().offset(-LayoutConstant.itemBottomPadding)
     }
     view.addSubview(tcpUdpSegmentControl)
     tcpUdpSegmentControl.snp.makeConstraints { (make) in
@@ -364,7 +390,7 @@ class CassiniDroneController: UIViewController {
     msgButton.snp.makeConstraints { (make) in
       make.size.equalTo(self.closeButton)
       make.centerX.equalToSuperview()
-      make.bottom.equalToSuperview().offset(-10)
+      make.bottom.equalToSuperview().offset(-LayoutConstant.itemBottomPadding)
     }
     isHeroEnabled = true
     
