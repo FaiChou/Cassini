@@ -44,12 +44,14 @@ class CassiniDroneController: UIViewController {
     label.heroID = "content"
     return label
     }()
-  lazy var msgLabel: UILabel = {
-    let label = UILabel()
+  lazy var msgLabel: RoundedLabel = {
+    let label = RoundedLabel()
     label.text = self.msg
     label.textAlignment = .center
     label.textColor = UIColor.black
     label.font = UIFont.boldSystemFont(ofSize: 13)
+    label.layer.borderColor = UIColor.blue.cgColor
+    label.layer.borderWidth = 0.5
     return label
   }()
   
@@ -133,6 +135,7 @@ class CassiniDroneController: UIViewController {
     default:
       break
     }
+    self.msg = ""
   }
   
   let settingButton: UIButton = {
@@ -353,7 +356,7 @@ class CassiniDroneController: UIViewController {
     }
     view.addSubview(msgLabel)
     msgLabel.snp.makeConstraints { (make) in
-      make.width.equalToSuperview()
+      make.width.equalToSuperview().multipliedBy(0.7)
       make.height.equalTo(40)
       make.centerX.equalToSuperview()
       make.top.equalTo(self.sendButton.snp.bottom).offset(5)
@@ -467,4 +470,13 @@ class RadarLayer: CALayer {
     self.animationGroup?.animations = animations
   }
   
+}
+
+class RoundedLabel: UILabel {
+  override func layoutSubviews() {
+    super.layoutSubviews()
+    let radius: CGFloat = self.bounds.size.height / 2.0
+    self.layer.cornerRadius = radius
+    self.clipsToBounds = true
+  }
 }

@@ -21,4 +21,17 @@ public extension UIView {
       make.left.equalToSuperview()
     }
   }
+  enum BubbleDirection {
+    case left, right
+  }
+  func bubble(_ direction: BubbleDirection = .left) {
+    let iv = UIImageView()
+    iv.frame = CGRect(origin: .zero, size: bounds.size)
+    let imageDirName = direction == .left ? "bubble-left" : "bubble-right"
+    let capInsets = direction == .left ? UIEdgeInsetsMake(20, 20, 20, 20) : UIEdgeInsetsMake(30, 50, 30, 50)
+    iv.image = UIImage(named: imageDirName)?
+      .resizableImage(withCapInsets: capInsets,
+                      resizingMode: .stretch)
+    self.layer.mask = iv.layer
+  }
 }
