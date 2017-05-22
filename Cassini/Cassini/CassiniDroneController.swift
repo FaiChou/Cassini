@@ -13,7 +13,7 @@ import QuartzCore
 
 let HOST = "CassiniHost"
 let PORT = "CassiniPort"
-
+let MSGHLEADING = "c<c"
 class CassiniDroneController: UIViewController {
   
   //MARK: - variables
@@ -27,11 +27,13 @@ class CassiniDroneController: UIViewController {
       self.serverLabel.text = "\(self.host):\(port)"
     }
   }
-  var msg = "FaiChou" {
+  var msg = "c<c050" {
     didSet {
-      self.msgLabel.text = msg
+      
     }
   }
+  
+  var timer = Timer()
   
   //MARK: - control & his action
   lazy var serverLabel: UILabel = {
@@ -105,26 +107,6 @@ class CassiniDroneController: UIViewController {
     }
   }
   
-  lazy var sendButton: UIButton = {
-    let button = UIButton(type: .custom)
-    button.setBackgroundImage(UIImage(named: "ios7-paperplane-outline"), for: .normal)
-    button.addTarget(self,
-                     action: #selector(send),
-                     for: .touchUpInside)
-    button.heroID = "Cassini"
-    button.layer.addSublayer(self.radarLayer)
-    return button
-  }()
-  
-  let radarLayer: RadarLayer = {
-    let layer = RadarLayer()
-    layer.repeatTime = 3
-    layer.radius = 25
-    layer.backgroundColor = UIColor(red:0.13, green:0.13, blue:0.19, alpha:1.00).cgColor
-    layer.position = CGPoint(x: 25, y: 25)
-    return layer
-  }()
-  
   func send() {
     let data = self.msg.data(using: .utf8)
     switch self.currentSocketMode {
@@ -135,7 +117,6 @@ class CassiniDroneController: UIViewController {
     default:
       break
     }
-    self.msg = ""
   }
   
   let settingButton: UIButton = {
@@ -205,57 +186,6 @@ class CassiniDroneController: UIViewController {
     }
   }
   
-  let msgButton: UIButton = {
-    let button = UIButton(type: .custom)
-    button.setBackgroundImage(UIImage(named: "ios7-keypad-outline"), for: .normal)
-    button.addTarget(self,
-                     action: #selector(writeMyMsg),
-                     for: .touchUpInside)
-    return button
-  }()
-  
-  func writeMyMsg() {
-    let alertController = UIAlertController(
-      title: "Type Your Message",
-      message: "Message Sent to Server",
-      preferredStyle: .alert)
-    alertController.addTextField { (textField) in
-      textField.placeholder = "message(\(self.msg))"
-      textField.delegate = self
-      textField.addTarget(self,
-                          action: #selector(self.msgAlertTextFieldChang),
-                          for: .editingChanged)
-    }
-    
-    let okAction = UIAlertAction(
-      title: "OK",
-      style: .default) { (action) in
-        let msgTF = alertController.textFields![0] as UITextField
-        self.msg = msgTF.text ?? "FaiChou"
-    }
-    okAction.isEnabled = false
-    let cancleAction = UIAlertAction(
-      title: "Cancel",
-      style: .cancel) { (action) in
-        print("cancel..")
-    }
-    alertController.addAction(okAction)
-    alertController.addAction(cancleAction)
-    self.present(
-      alertController,
-      animated: true,
-      completion: nil)
-  }
-  func msgAlertTextFieldChang() {
-    let alertController = self.presentedViewController as? UIAlertController
-    if alertController != nil {
-      let msgTF = alertController?.textFields?[0]
-      if (msgTF?.text?.characters.count)! > 0 {
-        alertController?.actions.first?.isEnabled = true
-      }
-    }
-  }
-  
   enum SocketMode {
     case None
     case TCP
@@ -265,9 +195,9 @@ class CassiniDroneController: UIViewController {
   var currentSocketMode: SocketMode = .UDP {
     didSet {
       if currentSocketMode == .UDP {
-//        self.socketTcp.disconnect()
+
       } else {
-//        self.reconnectTcp()
+
       }
     }
   }
@@ -308,6 +238,62 @@ class CassiniDroneController: UIViewController {
     static let bottomBarHeight = 40
   }
   
+  let speedSlider: UISlider = {
+    let s = UISlider()
+    s.minimumValue = 0
+    
+    s.maximumValue = 200
+    s.addTarget(self,
+                action: #selector(changeSpeed),
+                for: .valueChanged)
+    s.setValue(50, animated: true)
+    return s
+  }()
+  func changeSpeed(_ stepper: UISlider) {
+    let s = Int(stepper.value)
+    let ss = String(format: "%03d", s)
+    msg = MSGHLEADING + ss
+    print(msg)
+  }
+  let speedMinimumValueLabel: UILabel = {
+    let l = UILabel()
+    l.text = "0"
+    l.font = UIFont.systemFont(ofSize: 10)
+    l.textAlignment = .center
+    return l
+  }()
+  let speedMaximunValueLabel: UILabel = {
+    let l = UILabel()
+    l.text = "200"
+    l.font = UIFont.systemFont(ofSize: 10)
+    l.textAlignment = .center
+    return l
+  }()
+  let openSwitcher: UISwitch = {
+    let s = UISwitch()
+    s.isOn = false
+    s.addTarget(self,
+                action: #selector(switchSpeed),
+                for: .valueChanged)
+    return s
+  }()
+  func switchSpeed(_ switcher: UISwitch) {
+    let state = switcher.isOn ? "开" : "关"
+    print(state)
+    if switcher.isOn {
+      timer = Timer.scheduledTimer(
+        timeInterval: 0.1,
+        target: self,
+        selector: #selector(send),
+        userInfo: nil,
+        repeats: true)
+    } else {
+      timer.invalidate()
+    }
+  }
+  func tickTimerAction() {
+    
+  }
   //MARK: - life cycle
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -348,25 +334,32 @@ class CassiniDroneController: UIViewController {
       make.centerX.equalToSuperview()
       make.height.equalTo(25)
     }
-    view.addSubview(sendButton)
-    sendButton.snp.makeConstraints { (make) in
+    
+    view.addSubview(speedSlider)
+    view.addSubview(openSwitcher)
+    view.addSubview(speedMinimumValueLabel)
+    view.addSubview(speedMaximunValueLabel)
+    
+    speedSlider.snp.makeConstraints { (make) in
       make.center.equalToSuperview()
-      make.width.equalTo(50)
-      make.height.equalTo(50)
+      make.width.equalToSuperview().multipliedBy(0.8)
+      make.height.equalTo(20)
     }
-    view.addSubview(msgLabel)
-    msgLabel.snp.makeConstraints { (make) in
-      make.width.equalToSuperview().multipliedBy(0.7)
-      make.height.equalTo(40)
+    speedMinimumValueLabel.snp.makeConstraints { (make) in
+      make.size.equalTo(30)
+      make.centerY.equalTo(speedSlider)
+      make.right.equalTo(speedSlider.snp.left)
+    }
+    speedMaximunValueLabel.snp.makeConstraints { (make) in
+      make.size.equalTo(speedMinimumValueLabel)
+      make.centerY.equalTo(speedSlider)
+      make.left.equalTo(speedSlider.snp.right)
+    }
+    openSwitcher.snp.makeConstraints { (make) in
       make.centerX.equalToSuperview()
-      make.top.equalTo(self.sendButton.snp.bottom).offset(5)
+      make.bottom.equalToSuperview().offset(-60)
     }
-    view.addSubview(msgButton)
-    msgButton.snp.makeConstraints { (make) in
-      make.size.equalTo(self.closeButton)
-      make.centerX.equalToSuperview()
-      make.bottom.equalToSuperview().offset(-LayoutConstant.itemBottomPadding)
-    }
+    
     isHeroEnabled = true
     
     self.host = (UserDefaults.standard.value(forKey: HOST) as? String) ?? "192.168.2.3"
