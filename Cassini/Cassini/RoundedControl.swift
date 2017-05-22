@@ -23,7 +23,7 @@ class RoundedView: UIView {
     super.layoutSubviews()
     let radius: CGFloat = self.bounds.size.height / 2.0
     self.layer.cornerRadius = radius
-    self.clipsToBounds = true
+//    self.clipsToBounds = true
   }
 }
 

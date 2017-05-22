@@ -23,11 +23,7 @@ class CassiniDroneController: UIViewController {
       serverLabel.text = "\(host):\(port)"
     }
   }
-  var msg = "c<c050" {
-    didSet {
-      
-    }
-  }
+  var signal = Signal()
   
   var timer = Timer()
   
@@ -54,7 +50,7 @@ class CassiniDroneController: UIViewController {
   }()
   func close() {
     socketUdp.close()
-    socketTcp.disconnect()
+    disconnectTcp()
     dismiss(animated: true, completion: nil)
   }
   
@@ -62,7 +58,7 @@ class CassiniDroneController: UIViewController {
     let socket = GCDAsyncUdpSocket(delegate: self, delegateQueue: DispatchQueue.main)
     let port = UInt16(3333)
     do {
-      try socket.bind(toPort: port)
+      try socket.bind(toPort: port) // bind 是给自己
     } catch let err as NSError {
       print(">>> Error while initializing socket: \(err.localizedDescription)")
       socket.close()
@@ -72,29 +68,26 @@ class CassiniDroneController: UIViewController {
 
   lazy var socketTcp: GCDAsyncSocket = {
     let socket = GCDAsyncSocket(delegate: self, delegateQueue: DispatchQueue.main)
-    do {
-      try socket.connect(toHost: self.host, onPort: UInt16(self.port))
-    } catch let err as NSError {
-      print(">>> Error while initializing socket: \(err.localizedDescription)")
-      socket.disconnect()
-    }
     return socket
   }()
 
   private func reconnectTcp() {
-    if socketTcp.isConnected {
-      socketTcp.disconnect()
-    }
+    disconnectTcp()
     do {
-      try self.socketTcp.connect(toHost: host, onPort: UInt16(port))
+      try socketTcp.connect(toHost: host, onPort: UInt16(port))
     } catch let err as NSError {
       print(">>> Error while initializing socket: \(err.localizedDescription)")
       socketTcp.disconnect()
     }
   }
+  private func disconnectTcp() {
+    if socketTcp.isConnected {
+      socketTcp.disconnect()
+    }
+  }
   
   func send() {
-    let data = msg.data(using: .utf8)
+    let data = signal.message.data(using: .utf8)
     switch currentSocketMode {
     case .UDP:
       socketUdp.send(data!, toHost: host, port: UInt16(port), withTimeout: 2, tag: 0)
@@ -107,7 +100,7 @@ class CassiniDroneController: UIViewController {
   
   let settingButton: UIButton = {
     let button = UIButton(type: .custom)
-    button.setBackgroundImage(UIImage(named: "ios7-gear-outline"), for: .normal)
+    button.setBackgroundImage(UIImage(named: "ios7-cog"), for: .normal)
     button.addTarget(self,
                      action: #selector(setting),
                      for: .touchUpInside)
@@ -141,7 +134,9 @@ class CassiniDroneController: UIViewController {
         let portTF = alertController.textFields![1] as UITextField
         self.host = hostTF.text ?? "192.168.2.3"
         self.port = ((portTF.text ?? "6666") as NSString).integerValue
-        self.reconnectTcp()
+        if self.currentSocketMode == .TCP {
+          self.reconnectTcp()
+        }
         UserDefaults.standard.set(self.host, forKey: HOST)
         UserDefaults.standard.set(self.port, forKey: PORT)
     }
@@ -179,9 +174,9 @@ class CassiniDroneController: UIViewController {
   var currentSocketMode: SocketMode = .UDP {
     didSet {
       if currentSocketMode == .UDP {
-
+        disconnectTcp()
       } else {
-
+        reconnectTcp()
       }
     }
   }
@@ -225,19 +220,17 @@ class CassiniDroneController: UIViewController {
   let speedSlider: UISlider = {
     let s = UISlider()
     s.minimumValue = 0
-    
-    s.maximumValue = 200
+    s.maximumValue = 100
     s.addTarget(self,
                 action: #selector(changeSpeed),
                 for: .valueChanged)
     s.setValue(50, animated: true)
     return s
   }()
-  func changeSpeed(_ stepper: UISlider) {
-    let s = Int(stepper.value)
-    let ss = String(format: "%03d", s)
-    msg = MSGLEADING + ss
-    print(msg)
+  func changeSpeed(_ slider: UISlider) {
+    let speed = Int(slider.value)
+    speedCurrentValueLabel.text = "当前速度: \(speed)"
+    signal.changeSpeed(to: speed)
   }
   let speedMinimumValueLabel: UILabel = {
     let l = UILabel()
@@ -248,7 +241,14 @@ class CassiniDroneController: UIViewController {
   }()
   let speedMaximunValueLabel: UILabel = {
     let l = UILabel()
-    l.text = "200"
+    l.text = "100"
+    l.font = UIFont.systemFont(ofSize: 10)
+    l.textAlignment = .center
+    return l
+  }()
+  let speedCurrentValueLabel: UILabel = {
+    let l = UILabel()
+    l.text = "当前速度: 50"
     l.font = UIFont.systemFont(ofSize: 10)
     l.textAlignment = .center
     return l
@@ -275,43 +275,102 @@ class CassiniDroneController: UIViewController {
       timer.invalidate()
     }
   }
-  func tickTimerAction() {
-    
+  
+  lazy var directionArea: RoundedView = {
+    let v = RoundedView()
+    v.backgroundColor = .blue
+    v.alpha = 0.7
+    v.layer.addSublayer(self.directionLadar)
+    return v
+  }()
+  let directionLadar: RadarLayer = {
+    let l = RadarLayer()
+    l.backgroundColor = UIColor.red.cgColor
+    l.radius = 100
+    l.repeatTime = 4.0
+    l.position = CGPoint(
+      x: 100,
+      y: 100)
+    return l
+  }()
+  let leftRotationButton: RoundedButton = {
+    let b = RoundedButton()
+    b.setBackgroundImage(UIImage(named: "ios7-reload-left"), for: .normal)
+    b.addTarget(
+      self,
+      action: #selector(rotateLeft),
+      for: .touchUpInside)
+    return b
+  }()
+  func rotateLeft() {
+    signal.changeRotation(to: .left)
   }
+  let rightRotationButton: RoundedButton = {
+    let b = RoundedButton()
+    b.setBackgroundImage(
+      UIImage(named: "ios7-reload-right"),
+      for: .normal)
+    b.addTarget(
+      self,
+      action: #selector(rotateRight),
+      for: .touchUpInside)
+    return b
+  }()
+  func rotateRight() {
+    signal.changeRotation(to: .right)
+  }
+  
+
   //MARK: - life cycle
   override func viewDidLoad() {
     super.viewDidLoad()
     view.backgroundColor = UIColor.white
     
     view.addSubview(bottomView)
+    view.addSubview(closeButton)
+    view.addSubview(serverLabel)
+    view.addSubview(settingButton)
+    view.addSubview(tcpUdpSegmentControl)
+    
+    view.addSubview(speedSlider)
+    view.addSubview(openSwitcher)
+    view.addSubview(speedMinimumValueLabel)
+    view.addSubview(speedMaximunValueLabel)
+    view.addSubview(speedCurrentValueLabel)
+    view.addSubview(directionArea)
+    view.addSubview(leftRotationButton)
+    view.addSubview(rightRotationButton)
+    
+    isHeroEnabled = true
+    
+    host = (UserDefaults.standard.value(forKey: HOST) as? String) ?? "192.168.2.3"
+    port = (UserDefaults.standard.value(forKey: PORT) as? Int) ?? 6666
+  }
+  override func viewDidLayoutSubviews() {
+    super.viewDidLayoutSubviews()
     bottomView.snp.makeConstraints { (make) in
       make.width.equalToSuperview()
       make.centerX.equalToSuperview()
       make.height.equalTo(LayoutConstant.bottomBarHeight)
       make.bottom.equalToSuperview()
     }
-    
-    view.addSubview(closeButton)
     closeButton.snp.makeConstraints { (make) in
       make.width.equalTo(LayoutConstant.itemWitdh)
       make.height.equalTo(LayoutConstant.itemHeight)
       make.bottom.equalToSuperview().offset(-LayoutConstant.itemBottomPadding)
       make.right.equalToSuperview().offset(-LayoutConstant.itemRightPadding)
     }
-    view.addSubview(serverLabel)
     serverLabel.snp.makeConstraints { (make) in
       make.centerX.equalToSuperview()
       make.top.equalToSuperview().offset(20)
       make.width.equalTo(200)
       make.height.equalTo(50)
     }
-    view.addSubview(settingButton)
     settingButton.snp.makeConstraints { (make) in
       make.size.equalTo(closeButton)
       make.left.equalToSuperview().offset(LayoutConstant.itemLeftPadding)
       make.bottom.equalToSuperview().offset(-LayoutConstant.itemBottomPadding)
     }
-    view.addSubview(tcpUdpSegmentControl)
     tcpUdpSegmentControl.snp.makeConstraints { (make) in
       make.width.equalToSuperview().multipliedBy(0.5)
       make.top.equalTo(serverLabel.snp.bottom).offset(10)
@@ -319,15 +378,11 @@ class CassiniDroneController: UIViewController {
       make.height.equalTo(25)
     }
     
-    view.addSubview(speedSlider)
-    view.addSubview(openSwitcher)
-    view.addSubview(speedMinimumValueLabel)
-    view.addSubview(speedMaximunValueLabel)
-    
     speedSlider.snp.makeConstraints { (make) in
-      make.center.equalToSuperview()
+      make.centerX.equalToSuperview()
       make.width.equalToSuperview().multipliedBy(0.8)
       make.height.equalTo(20)
+      make.top.equalTo(tcpUdpSegmentControl.snp.bottom).offset(25)
     }
     speedMinimumValueLabel.snp.makeConstraints { (make) in
       make.size.equalTo(30)
@@ -339,16 +394,32 @@ class CassiniDroneController: UIViewController {
       make.centerY.equalTo(speedSlider)
       make.left.equalTo(speedSlider.snp.right)
     }
+    speedCurrentValueLabel.snp.makeConstraints { (make) in
+      make.width.equalTo(100)
+      make.height.equalTo(11)
+      make.centerX.equalTo(speedSlider)
+      make.bottom.equalTo(speedSlider.snp.top).offset(-2)
+    }
     openSwitcher.snp.makeConstraints { (make) in
       make.centerX.equalToSuperview()
       make.bottom.equalToSuperview().offset(-60)
     }
-    
-    isHeroEnabled = true
-    
-    host = (UserDefaults.standard.value(forKey: HOST) as? String) ?? "192.168.2.3"
-    port = (UserDefaults.standard.value(forKey: PORT) as? Int) ?? 6666
+    directionArea.snp.makeConstraints { (make) in
+      make.center.equalToSuperview()
+      make.size.equalTo(200)
+    }
+    leftRotationButton.snp.makeConstraints { (make) in
+      make.size.equalTo(40)
+      make.centerY.equalTo(openSwitcher)
+      make.left.equalTo(20)
+    }
+    rightRotationButton.snp.makeConstraints { (make) in
+      make.size.equalTo(leftRotationButton)
+      make.centerY.equalTo(openSwitcher)
+      make.right.equalTo(-20)
+    }
   }
+  
   deinit {
     print(">>> socket dead..")
   }
