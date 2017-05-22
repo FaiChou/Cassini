@@ -83,6 +83,8 @@
 		4D34ECCD1EB1D7180095EFA5 /* LayoutConstraintItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D34EC861EB1D7180095EFA5 /* LayoutConstraintItem.swift */; };
 		4D34ECCE1EB1D7180095EFA5 /* UILayoutSupport+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D34EC881EB1D7180095EFA5 /* UILayoutSupport+Extensions.swift */; };
 		4D6D0FE31ED28570000A55CA /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D6D0FE21ED28570000A55CA /* Global.swift */; };
+		4D6D0FE51ED28B9F000A55CA /* RoundedControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D6D0FE41ED28B9F000A55CA /* RoundedControl.swift */; };
+		4D6D0FE71ED28C4A000A55CA /* Radar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D6D0FE61ED28C4A000A55CA /* Radar.swift */; };
 		4DDAEB8A1EB36CA8001D0765 /* CassiniDroneController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DDAEB891EB36CA8001D0765 /* CassiniDroneController.swift */; };
 		4DDAEB8C1EB36D2A001D0765 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4DDAEB8B1EB36D2A001D0765 /* QuartzCore.framework */; };
 		4DF3B71C1EC2AC02003EFDA3 /* SBHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DF3B71B1EC2AC02003EFDA3 /* SBHUD.swift */; };
@@ -172,6 +174,8 @@
 		4D34EC871EB1D7180095EFA5 /* SnapKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SnapKit.h; sourceTree = "<group>"; };
 		4D34EC881EB1D7180095EFA5 /* UILayoutSupport+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UILayoutSupport+Extensions.swift"; sourceTree = "<group>"; };
 		4D6D0FE21ED28570000A55CA /* Global.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Global.swift; sourceTree = "<group>"; };
+		4D6D0FE41ED28B9F000A55CA /* RoundedControl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoundedControl.swift; sourceTree = "<group>"; };
+		4D6D0FE61ED28C4A000A55CA /* Radar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Radar.swift; sourceTree = "<group>"; };
 		4DDAEB891EB36CA8001D0765 /* CassiniDroneController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CassiniDroneController.swift; sourceTree = "<group>"; };
 		4DDAEB8B1EB36D2A001D0765 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		4DF3B71B1EC2AC02003EFDA3 /* SBHUD.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SBHUD.swift; sourceTree = "<group>"; };
@@ -250,6 +254,8 @@
 				4D34EB991EB1CDE60095EFA5 /* LaunchScreen.storyboard */,
 				4D34EB921EB1CDE50095EFA5 /* ViewController.swift */,
 				4DDAEB891EB36CA8001D0765 /* CassiniDroneController.swift */,
+				4D6D0FE61ED28C4A000A55CA /* Radar.swift */,
+				4D6D0FE41ED28B9F000A55CA /* RoundedControl.swift */,
 				4D6D0FE21ED28570000A55CA /* Global.swift */,
 			);
 			name = Main;
@@ -528,6 +534,7 @@
 				4D34ECBF1EB1D7180095EFA5 /* ConstraintMakerPriortizable.swift in Sources */,
 				4D34EC9E1EB1D7180095EFA5 /* HeroPlugin.swift in Sources */,
 				4D34EC951EB1D7180095EFA5 /* UIKit+Hero.swift in Sources */,
+				4D6D0FE71ED28C4A000A55CA /* Radar.swift in Sources */,
 				4D6D0FE31ED28570000A55CA /* Global.swift in Sources */,
 				4D34ECA51EB1D7180095EFA5 /* Parser.swift in Sources */,
 				4D34ECA81EB1D7180095EFA5 /* CascadePreprocessor.swift in Sources */,
@@ -559,6 +566,7 @@
 				4D34ECC31EB1D7180095EFA5 /* ConstraintPriority.swift in Sources */,
 				4D34ECC21EB1D7180095EFA5 /* ConstraintOffsetTarget.swift in Sources */,
 				4D34ECC01EB1D7180095EFA5 /* ConstraintMakerRelatable.swift in Sources */,
+				4D6D0FE51ED28B9F000A55CA /* RoundedControl.swift in Sources */,
 				4D34EC8D1EB1D7180095EFA5 /* HeroDebugPlugin.swift in Sources */,
 				4D34ECC11EB1D7180095EFA5 /* ConstraintMultiplierTarget.swift in Sources */,
 				4D34EC8E1EB1D7180095EFA5 /* HeroDebugView.swift in Sources */,
