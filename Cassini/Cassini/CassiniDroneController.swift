@@ -9,22 +9,18 @@
 import Foundation
 import UIKit
 import CocoaAsyncSocket
-import QuartzCore
 
-let HOST = "CassiniHost"
-let PORT = "CassiniPort"
-let MSGHLEADING = "c<c"
 class CassiniDroneController: UIViewController {
   
   //MARK: - variables
   var host = "192.168.2.3" {
     didSet {
-      self.serverLabel.text = "\(host):\(self.port)"
+      serverLabel.text = "\(host):\(port)"
     }
   }
   var port = 6666 {
     didSet {
-      self.serverLabel.text = "\(self.host):\(port)"
+      serverLabel.text = "\(host):\(port)"
     }
   }
   var msg = "c<c050" {
@@ -46,16 +42,6 @@ class CassiniDroneController: UIViewController {
     label.heroID = "content"
     return label
     }()
-  lazy var msgLabel: RoundedLabel = {
-    let label = RoundedLabel()
-    label.text = self.msg
-    label.textAlignment = .center
-    label.textColor = UIColor.black
-    label.font = UIFont.boldSystemFont(ofSize: 13)
-    label.layer.borderColor = UIColor.blue.cgColor
-    label.layer.borderWidth = 0.5
-    return label
-  }()
   
   let closeButton: UIButton = {
     let button = UIButton(type: .custom)
@@ -96,22 +82,22 @@ class CassiniDroneController: UIViewController {
   }()
 
   private func reconnectTcp() {
-    if self.socketTcp.isConnected {
-      self.socketTcp.disconnect()
+    if socketTcp.isConnected {
+      socketTcp.disconnect()
     }
     do {
-      try self.socketTcp.connect(toHost: self.host, onPort: UInt16(self.port))
+      try self.socketTcp.connect(toHost: host, onPort: UInt16(port))
     } catch let err as NSError {
       print(">>> Error while initializing socket: \(err.localizedDescription)")
-      self.socketTcp.disconnect()
+      socketTcp.disconnect()
     }
   }
   
   func send() {
-    let data = self.msg.data(using: .utf8)
-    switch self.currentSocketMode {
+    let data = msg.data(using: .utf8)
+    switch currentSocketMode {
     case .UDP:
-      socketUdp.send(data!, toHost: self.host, port: UInt16(port), withTimeout: 2, tag: 0)
+      socketUdp.send(data!, toHost: host, port: UInt16(port), withTimeout: 2, tag: 0)
     case .TCP:
       socketTcp.write(data!, withTimeout: -1, tag: 0)
     default:
@@ -137,7 +123,6 @@ class CassiniDroneController: UIViewController {
     alertController.addTextField { (textField) in
       textField.placeholder = "host(\(self.host))"
       textField.keyboardType = .decimalPad
-      textField.delegate = self
       textField.addTarget(self,
                           action: #selector(self.alertTextFieldChangeCharactor(sender:)),
                           for: .editingChanged)
@@ -145,7 +130,6 @@ class CassiniDroneController: UIViewController {
     alertController.addTextField { (textField) in
       textField.placeholder = "port(\(self.port))"
       textField.keyboardType = .decimalPad
-      textField.delegate = self
       textField.addTarget(self,
                           action: #selector(self.alertTextFieldChangeCharactor(sender:)),
                           for: .editingChanged)
@@ -169,13 +153,13 @@ class CassiniDroneController: UIViewController {
     }
     alertController.addAction(okAction)
     alertController.addAction(cancleAction)
-    self.present(
+    present(
       alertController,
       animated: true,
       completion: nil)
   }
   func alertTextFieldChangeCharactor(sender: UITextField) {
-    let alertController = self.presentedViewController as? UIAlertController
+    let alertController = presentedViewController as? UIAlertController
     if alertController != nil {
       let hostTF = alertController?.textFields?[0]
       let portTF = alertController?.textFields?[1]
@@ -213,11 +197,11 @@ class CassiniDroneController: UIViewController {
   @objc private func switchTcpUdp(sc: UISegmentedControl) {
     switch sc.selectedSegmentIndex {
     case 0:
-      self.currentSocketMode = .UDP
+      currentSocketMode = .UDP
     case 1:
-      self.currentSocketMode = .TCP
+      currentSocketMode = .TCP
     default:
-      self.currentSocketMode = .None
+      currentSocketMode = .None
     }
   }
   
@@ -252,7 +236,7 @@ class CassiniDroneController: UIViewController {
   func changeSpeed(_ stepper: UISlider) {
     let s = Int(stepper.value)
     let ss = String(format: "%03d", s)
-    msg = MSGHLEADING + ss
+    msg = MSGLEADING + ss
     print(msg)
   }
   let speedMinimumValueLabel: UILabel = {
@@ -323,7 +307,7 @@ class CassiniDroneController: UIViewController {
     }
     view.addSubview(settingButton)
     settingButton.snp.makeConstraints { (make) in
-      make.size.equalTo(self.closeButton)
+      make.size.equalTo(closeButton)
       make.left.equalToSuperview().offset(LayoutConstant.itemLeftPadding)
       make.bottom.equalToSuperview().offset(-LayoutConstant.itemBottomPadding)
     }
@@ -362,8 +346,8 @@ class CassiniDroneController: UIViewController {
     
     isHeroEnabled = true
     
-    self.host = (UserDefaults.standard.value(forKey: HOST) as? String) ?? "192.168.2.3"
-    self.port = (UserDefaults.standard.value(forKey: PORT) as? Int) ?? 6666
+    host = (UserDefaults.standard.value(forKey: HOST) as? String) ?? "192.168.2.3"
+    port = (UserDefaults.standard.value(forKey: PORT) as? Int) ?? 6666
   }
   deinit {
     print(">>> socket dead..")
@@ -392,15 +376,6 @@ extension CassiniDroneController: GCDAsyncUdpSocketDelegate {
     print(#function)
   }
   func udpSocketDidClose(_ sock: GCDAsyncUdpSocket, withError error: Error?) {
-    print(#function)
-  }
-}
-extension CassiniDroneController: UITextFieldDelegate {
-  //MARK: - UITextFieldDelegate
-  func textFieldDidEndEditing(_ textField: UITextField) {
-    print(#function)
-  }
-  func textFieldDidBeginEditing(_ textField: UITextField) {
     print(#function)
   }
 }
