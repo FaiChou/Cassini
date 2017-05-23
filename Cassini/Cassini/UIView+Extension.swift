@@ -35,3 +35,26 @@ public extension UIView {
     self.layer.mask = iv.layer
   }
 }
+extension UIView {
+  func contains(point: CGPoint) -> Bool {
+    let radius = bounds.width / 2
+    let dx = point.x-center.x
+    let dy = point.y-center.y
+    if (dx*dx + dy*dy) <= radius*radius {
+      return true
+    } else {
+      return false
+    }
+  }
+}
+extension UIView {
+  func rotate360Degrees(duration: CFTimeInterval = 3) {
+    let rotateAnimation = CABasicAnimation(keyPath: "transform.rotation")
+    rotateAnimation.fromValue = 0.0
+    rotateAnimation.toValue = CGFloat(Double.pi * 2)
+    rotateAnimation.isRemovedOnCompletion = false
+    rotateAnimation.duration = duration
+    rotateAnimation.repeatCount=Float.infinity
+    self.layer.add(rotateAnimation, forKey: nil)
+  }
+}

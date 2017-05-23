@@ -9,6 +9,8 @@
 import Foundation
 import UIKit
 import CocoaAsyncSocket
+import CoreMotion
+import simd
 
 class CassiniDroneController: UIViewController {
   
@@ -225,6 +227,7 @@ class CassiniDroneController: UIViewController {
                 action: #selector(changeSpeed),
                 for: .valueChanged)
     s.setValue(50, animated: true)
+    s.isEnabled = false
     return s
   }()
   func changeSpeed(_ slider: UISlider) {
@@ -257,14 +260,19 @@ class CassiniDroneController: UIViewController {
     let s = UISwitch()
     s.isOn = false
     s.addTarget(self,
-                action: #selector(switchSpeed),
+                action: #selector(switchCassini),
                 for: .valueChanged)
     return s
   }()
-  func switchSpeed(_ switcher: UISwitch) {
+  func switchCassini(_ switcher: UISwitch) {
     let state = switcher.isOn ? "开" : "关"
     print(state)
     if switcher.isOn {
+      speedSlider.isEnabled = true
+      leftRotationButton.isEnabled = true
+      rightRotationButton.isEnabled = true
+      signal.reset()
+      startMotionUpdates()
       timer = Timer.scheduledTimer(
         timeInterval: 0.1,
         target: self,
@@ -272,12 +280,27 @@ class CassiniDroneController: UIViewController {
         userInfo: nil,
         repeats: true)
     } else {
-      timer.invalidate()
+      speedSlider.setValue(50, animated: true)
+      speedCurrentValueLabel.text = "当前速度: 50"
+      stopMotionUpdates()
+      airplaneImageView.center = view.center
+      leftRotationButton.layer.removeAllAnimations()
+      rightRotationButton.layer.removeAllAnimations()
+      leftRotationButton.isEnabled = false
+      rightRotationButton.isEnabled = false
+      signal.shutdown()
+      DispatchQueue.main.asyncAfter(
+        deadline: DispatchTime.now()+0.5,
+        execute: {
+          self.speedSlider.isEnabled = false
+          self.timer.invalidate()
+      })
     }
   }
-  
+  let motionManager = CMMotionManager()
   lazy var directionArea: RoundedView = {
     let v = RoundedView()
+    v.frame.size = CGSize(width: 200, height: 200)
     v.backgroundColor = .blue
     v.alpha = 0.7
     v.layer.addSublayer(self.directionLadar)
@@ -293,6 +316,19 @@ class CassiniDroneController: UIViewController {
       y: 100)
     return l
   }()
+  let plusImageView: UIImageView = {
+    let iv = UIImageView()
+    iv.frame.size = CGSize(width: 20, height: 20)
+    iv.image = UIImage(named: "ios7-plus-empty")
+    iv.tintColor = .black
+    return iv
+  }()
+  let airplaneImageView: UIImageView = {
+    let iv = UIImageView()
+    iv.frame.size = CGSize(width: 30, height: 30)
+    iv.image = UIImage(named: "airplane")
+    return iv
+  }()
   let leftRotationButton: RoundedButton = {
     let b = RoundedButton()
     b.setBackgroundImage(UIImage(named: "ios7-reload-left"), for: .normal)
@@ -300,10 +336,23 @@ class CassiniDroneController: UIViewController {
       self,
       action: #selector(rotateLeft),
       for: .touchUpInside)
+    b.isEnabled = false
     return b
   }()
-  func rotateLeft() {
-    signal.changeRotation(to: .left)
+  func rotateLeft(_ button: UIButton) {
+    button.isSelected = !button.isSelected
+    if rightRotationButton.isSelected {
+      rightRotationButton.isSelected = false
+      rightRotationButton.layer.removeAllAnimations()
+    }
+    if button.isSelected {
+      button.rotate360Degrees()
+      signal.changeRotation(to: .left)
+    } else {
+      button.layer.removeAllAnimations()
+      signal.changeRotation(to: .none)
+    }
+    
   }
   let rightRotationButton: RoundedButton = {
     let b = RoundedButton()
@@ -314,12 +363,73 @@ class CassiniDroneController: UIViewController {
       self,
       action: #selector(rotateRight),
       for: .touchUpInside)
+    b.isEnabled = false
     return b
   }()
-  func rotateRight() {
-    signal.changeRotation(to: .right)
+  func rotateRight(_ button: UIButton) {
+    button.isSelected = !button.isSelected
+    if leftRotationButton.isSelected {
+      leftRotationButton.isSelected = false
+      leftRotationButton.layer.removeAllAnimations()
+    }
+    if button.isSelected {
+      button.rotate360Degrees()
+      signal.changeRotation(to: .right)
+    } else {
+      button.layer.removeAllAnimations()
+      signal.changeRotation(to: .none)
+    }
+    
   }
-  
+  func startMotionUpdates() {
+    guard motionManager.isAccelerometerAvailable else { return }
+    motionManager.accelerometerUpdateInterval = TimeInterval(0.01)
+    motionManager.showsDeviceMovementDisplay = true
+    
+    motionManager.startAccelerometerUpdates(
+      to: .main,
+      withHandler: { (accelerometerData, error) in
+        guard let accelerometerData = accelerometerData else { return }
+        
+        let offsetCenter: double2 =
+          [accelerometerData.acceleration.x,
+           accelerometerData.acceleration.y]
+        self.setAirplaneCenter(with: offsetCenter)
+    })
+  }
+  func stopMotionUpdates() {
+    guard motionManager.isAccelerometerAvailable else { return }
+    motionManager.stopAccelerometerUpdates()
+  }
+  func setAirplaneCenter(with offsetCenter: double2) {
+    let offsetX = offsetCenter.x
+    let offsetY = offsetCenter.y
+    
+    if abs(offsetX) > abs(offsetY) && offsetX > 0 {
+      signal.changeDirection(to: .right)
+    }
+    else if abs(offsetX) > abs(offsetY) && offsetX < 0 {
+      signal.changeDirection(to: .left)
+    }
+    else if abs(offsetX) < abs(offsetY) && offsetY > 0 {
+      signal.changeDirection(to: .ahead)
+    }
+    else if abs(offsetX) < abs(offsetY) && offsetY < 0 {
+      signal.changeDirection(to: .back)
+    }
+    else {
+      signal.changeDirection(to: .none)
+    }
+    
+    print("offsetX: \(offsetX) ## offsetY: \(offsetY)")
+    let originCenter = airplaneImageView.center
+    let newCenter = CGPoint(
+      x: Double(originCenter.x)+offsetX,
+      y: Double(originCenter.y)-offsetY)
+    if directionArea.contains(point: newCenter) {
+      airplaneImageView.center = newCenter
+    }
+  }
 
   //MARK: - life cycle
   override func viewDidLoad() {
@@ -337,9 +447,15 @@ class CassiniDroneController: UIViewController {
     view.addSubview(speedMinimumValueLabel)
     view.addSubview(speedMaximunValueLabel)
     view.addSubview(speedCurrentValueLabel)
-    view.addSubview(directionArea)
     view.addSubview(leftRotationButton)
     view.addSubview(rightRotationButton)
+    
+    view.addSubview(directionArea)
+    view.addSubview(plusImageView)
+    view.addSubview(airplaneImageView)
+    directionArea.center = view.center
+    plusImageView.center = view.center
+    airplaneImageView.center = view.center
     
     isHeroEnabled = true
     
@@ -404,10 +520,6 @@ class CassiniDroneController: UIViewController {
       make.centerX.equalToSuperview()
       make.bottom.equalToSuperview().offset(-60)
     }
-    directionArea.snp.makeConstraints { (make) in
-      make.center.equalToSuperview()
-      make.size.equalTo(200)
-    }
     leftRotationButton.snp.makeConstraints { (make) in
       make.size.equalTo(40)
       make.centerY.equalTo(openSwitcher)
@@ -418,6 +530,11 @@ class CassiniDroneController: UIViewController {
       make.centerY.equalTo(openSwitcher)
       make.right.equalTo(-20)
     }
+    
+  }
+  override func viewWillDisappear(_ animated: Bool) {
+    super.viewWillDisappear(animated)
+    stopMotionUpdates()
   }
   
   deinit {

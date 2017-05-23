@@ -442,7 +442,7 @@
 				TargetAttributes = {
 					4D34EB8C1EB1CDE50095EFA5 = {
 						CreatedOnToolsVersion = 8.3.2;
-						DevelopmentTeam = 5MPLF388EQ;
+						DevelopmentTeam = H9BGE26LXB;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -735,7 +735,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 5MPLF388EQ;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = Cassini/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -755,7 +755,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 5MPLF388EQ;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = Cassini/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

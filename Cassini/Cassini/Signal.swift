@@ -31,6 +31,12 @@ class Signal {
     currentRotation = "0"
   }
   
+  func shutdown() {
+    currentSpeed = "000"
+    currentDirection = "0"
+    currentRotation = "0"
+  }
+  
   func changeSpeed(to speed: Int) {
     let speedString: String
     if speed > 100 {
