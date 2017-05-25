@@ -112,7 +112,7 @@ class CassiniDroneController: UIViewController {
   
   func setting() {
     let alertController = UIAlertController(
-      title: "Add Configs",
+      title: "Add Settings",
       message: "host & port",
       preferredStyle: .alert)
     alertController.addTextField { (textField) in
@@ -164,6 +164,112 @@ class CassiniDroneController: UIViewController {
         && (portTF?.text?.characters.count)! > 3 {
         alertController?.actions.first?.isEnabled = true
       }
+    }
+  }
+  
+  let configButton: UIButton = {
+    let b = UIButton(type: .custom)
+    b.setBackgroundImage(UIImage(named: "ios7-information-outline"), for: .normal)
+    b.addTarget(self,
+                action: #selector(config),
+                for: .touchUpInside)
+    return b
+  }()
+  func config() {
+    let alertController = UIAlertController(
+      title: "Add Configs",
+      message: "Pitch, Roll & Yaw",
+      preferredStyle: .alert)
+    alertController.addTextField { (textField) in
+      textField.placeholder = "Pitch"
+      textField.addTarget(self,
+                          action: #selector(self.configTFChangeCharactor(sender:)),
+                          for: .editingChanged)
+    }
+    alertController.addTextField { (textField) in
+      textField.placeholder = "Roll"
+      textField.addTarget(self,
+                          action: #selector(self.configTFChangeCharactor(sender:)),
+                          for: .editingChanged)
+    }
+    alertController.addTextField { (textField) in
+      textField.placeholder = "Yaw"
+      textField.addTarget(self,
+                          action: #selector(self.configTFChangeCharactor(sender:)),
+                          for: .editingChanged)
+    }
+    let okAction = UIAlertAction(
+      title: "OK",
+      style: .default) { (action) in
+        let pitchTF = alertController.textFields![0] as UITextField
+        let rollTF = alertController.textFields![1] as UITextField
+        let yawTF = alertController.textFields![2] as UITextField
+        self.sendConfig(pitch: pitchTF.text!, roll: rollTF.text!, yaw: yawTF.text!)
+    }
+    okAction.isEnabled = false
+    let cancleAction = UIAlertAction(
+      title: "Cancel",
+      style: .cancel) { (action) in
+        print("cancel..")
+    }
+    alertController.addAction(okAction)
+    alertController.addAction(cancleAction)
+    present(
+      alertController,
+      animated: true,
+      completion: nil)
+  }
+  func configTFChangeCharactor(sender: UITextField) {
+    let alertController = presentedViewController as? UIAlertController
+    if alertController != nil {
+      let pitchTF = alertController?.textFields?[0]
+      let rollTF = alertController?.textFields?[1]
+      let yawTF = alertController?.textFields?[2]
+      if (pitchTF?.text?.characters.count)! > 0
+        && (rollTF?.text?.characters.count)! > 0
+        && (yawTF?.text?.characters.count)! > 0 {
+        alertController?.actions.first?.isEnabled = true
+      }
+    }
+  }
+  func sendConfig(pitch: String, roll: String, yaw: String) {
+    
+    var dataString: String
+    
+    let pA = pitch.components(separatedBy: " ")
+    let rA = roll.components(separatedBy: " ")
+    let yA = yaw.components(separatedBy: " ")
+    
+    let pp = pA[0]
+    let pi = pA[1]
+    let pd = pA[2]
+    
+    let rp = rA[0]
+    let ri = rA[1]
+    let rd = rA[2]
+    
+    let yp = yA[0]
+    let yi = yA[1]
+    let yd = yA[2]
+    
+    dataString =
+      "P" +
+      "p"+pp+"i"+pi+"d"+pd
+      + "R" +
+      "p"+rp+"i"+ri+"d"+rd
+      + "Y" +
+      "p"+yp+"i"+yi+"d"+yd
+    
+    print(dataString)
+    
+    let data = dataString.data(using: .utf8)
+    switch currentSocketMode {
+    case .UDP:
+      socketUdp.send(data!, toHost: host, port: UInt16(port), withTimeout: 2, tag: 0)
+    case .TCP:
+      socketTcp.write(data!, withTimeout: -1, tag: 0)
+    default:
+      break
     }
   }
   
@@ -438,6 +544,7 @@ class CassiniDroneController: UIViewController {
     
     view.addSubview(bottomView)
     view.addSubview(closeButton)
+    view.addSubview(configButton)
     view.addSubview(serverLabel)
     view.addSubview(settingButton)
     view.addSubview(tcpUdpSegmentControl)
@@ -485,6 +592,11 @@ class CassiniDroneController: UIViewController {
     settingButton.snp.makeConstraints { (make) in
       make.size.equalTo(closeButton)
       make.left.equalToSuperview().offset(LayoutConstant.itemLeftPadding)
+      make.bottom.equalToSuperview().offset(-LayoutConstant.itemBottomPadding)
+    }
+    configButton.snp.makeConstraints { (make) in
+      make.size.equalTo(closeButton)
+      make.centerX.equalToSuperview()
       make.bottom.equalToSuperview().offset(-LayoutConstant.itemBottomPadding)
     }
     tcpUdpSegmentControl.snp.makeConstraints { (make) in
